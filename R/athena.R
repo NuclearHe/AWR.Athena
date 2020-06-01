@@ -69,12 +69,12 @@ setClass("AthenaConnection",
 #' dbGetQuery(con, "Select count(*) from sampledb.elb_logs")
 #' }
 setMethod("dbConnect", "AthenaDriver",
-          function(drv, region, S3OutputLocation, Schema, ...) {
+          function(drv, region, S3OutputLocation,ProviderClass="com.simba.athena.amazonaws.auth.DefaultAWSCredentialsProviderChain", Schema, ...) {
 
   con <- callNextMethod(drv, url=sprintf('jdbc:awsathena://athena.%s.amazonaws.com:443/', region),
                    S3OutputLocation=S3OutputLocation,
                    Schema=Schema,
-                   AWSCredentialsProviderClass="com.simba.athena.amazonaws.auth.profile.ProfileCredentialsProvider", ...)
+                   AWSCredentialsProviderClass=ProviderClass, ...)
 
   new("AthenaConnection", jc = con@jc, identifier.quote = drv@identifier.quote, region=region,S3OutputLocation=S3OutputLocation, Schema=Schema)
 })
