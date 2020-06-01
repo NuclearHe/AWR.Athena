@@ -74,7 +74,7 @@ setMethod("dbConnect", "AthenaDriver",
   con <- callNextMethod(drv, url=sprintf('jdbc:awsathena://athena.%s.amazonaws.com:443/', region),
                    S3OutputLocation=S3OutputLocation,
                    Schema=Schema,
-                   AWSCredentialsProviderClass="com.simba.athena.amazonaws.auth.DefaultAWSCredentialsProviderChain", ...)
+                   AWSCredentialsProviderClass="com.simba.athena.amazonaws.auth.profile.ProfileCredentialsProvider", ...)
 
   new("AthenaConnection", jc = con@jc, identifier.quote = drv@identifier.quote, region=region,S3OutputLocation=S3OutputLocation, Schema=Schema)
 })
