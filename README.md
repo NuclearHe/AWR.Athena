@@ -15,7 +15,7 @@ install.packages("AWR.Athena")
 Or you can easily install the most recent development version of the R package as well:
 
 ```r
-devtools::install_github('nfultz/AWR.Athena')
+devtools::install_github('NuclearHe/AWR.Athena')
 ```
 
 ## What is it good for?
