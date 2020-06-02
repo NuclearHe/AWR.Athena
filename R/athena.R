@@ -20,17 +20,17 @@ Athena <- function() {
 #' @name AthenaDriver
 #' @rdname AthenaDriver-class
 setMethod(initialize, "AthenaDriver",
-   function(.Object, ...)
-{
-    # passed to parent builder, than unboxed, yuck
-    # should ping RJDBC maintainers, and have them implement initialize methods instead
-    jdbc <- JDBC(driverClass="com.simba.athena.jdbc.Driver",
-                 identifier.quote="'")
-
-    .Object@jdrv = jdbc@jdrv
-    .Object@identifier.quote = jdbc@identifier.quote
-    .Object
-})
+          function(.Object, ...)
+          {
+            # passed to parent builder, than unboxed, yuck
+            # should ping RJDBC maintainers, and have them implement initialize methods instead
+            jdbc <- JDBC(driverClass="com.simba.athena.jdbc.Driver",
+                         identifier.quote="'")
+            
+            .Object@jdrv = jdbc@jdrv
+            .Object@identifier.quote = jdbc@identifier.quote
+            .Object
+          })
 
 #' Athena connection class.
 #'
@@ -40,12 +40,12 @@ setMethod(initialize, "AthenaDriver",
 #' @importClassesFrom RJDBC JDBCConnection
 #' @keywords internal
 setClass("AthenaConnection",
-  contains = "JDBCConnection",
-  slots = list(
-    region = "character",
-    S3OutputLocation = "character",
-    Schema = "character"
-  )
+         contains = "JDBCConnection",
+         slots = list(
+           region = "character",
+           S3OutputLocation = "character",
+           Schema = "character"
+         )
 )
 
 #' Authentication credentials are read from the DefaultAWSCredentialsProviderChain, which includes the .aws folder and
@@ -69,12 +69,38 @@ setClass("AthenaConnection",
 #' dbGetQuery(con, "Select count(*) from sampledb.elb_logs")
 #' }
 setMethod("dbConnect", "AthenaDriver",
-          function(drv, region, S3OutputLocation,ProviderClass="com.simba.athena.amazonaws.auth.DefaultAWSCredentialsProviderChain", Schema, ...) {
+          function(drv, region, S3OutputLocation, Schema, ...) {
+            if(region=="cn-northwest-1"){
+              url_t <- sprintf('jdbc:awsathena://athena.%s.amazonaws.com.cn:443/', region)
+              url_t2 <- sprintf('athena.%s.amazonaws.com.cn:443/', region)
+            }else{
+              url_t <- sprintf('jdbc:awsathena://athena.%s.amazonaws.com:443/', region)
+              url_t2 <- sprintf('athena.%s.amazonaws.com:443/', region)
+            }
+            print(url_t)
+            con <- callNextMethod(drv, url=sprintf('jdbc:awsathena://athena.%s.amazonaws.com:443/', region),
+                                  #host="athena.cn-northwest-1.amazonaws.com.cn",
+                                  S3OutputLocation=S3OutputLocation,
+                                  Schema=Schema,
+                                  EndpointOverride=url_t2,
+                                  #AwsRegion="cn-northwest-1",
+                                  AWSCredentialsProviderClass="com.simba.athena.amazonaws.auth.DefaultAWSCredentialsProviderChain", ...)
+            
+            new("AthenaConnection", jc = con@jc, identifier.quote = drv@identifier.quote, region=region,S3OutputLocation=S3OutputLocation, Schema=Schema)
+          })
 
-  con <- callNextMethod(drv, url=sprintf('jdbc:awsathena://athena.%s.amazonaws.com:443/', region),
-                   S3OutputLocation=S3OutputLocation,
-                   Schema=Schema,
-                   AWSCredentialsProviderClass=ProviderClass, ...)
 
-  new("AthenaConnection", jc = con@jc, identifier.quote = drv@identifier.quote, region=region,S3OutputLocation=S3OutputLocation, Schema=Schema)
-})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
